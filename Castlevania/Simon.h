@@ -2,9 +2,9 @@
 #include "GameObject.h"
 
 
-#define SIMON_WALKING_SPEED		0.15f
+#define SIMON_WALKING_SPEED		0.07f
 #define SIMON_JUMP_SPEED_Y		0.5f
-#define SIMON_GRAVITY			0.07f
+#define SIMON_GRAVITY			0.002f
 
 #define SIMON_STATE_IDLE			0
 #define SIMON_STATE_WALKING_RIGHT	100
@@ -28,11 +28,18 @@
 #define SIMON_ANI_SIT_LEFT			9
 #define SIMON_ANI_SIT_FIGHT_RIGHT	10
 #define SIMON_ANI_SIT_FIGHT_LEFT	11
+#define SIMON_BBOX_WIDTH			30
+#define SIMON_BBOX_HEIGHT			60
+#define SIMON_UNTOUCHABLE_TIME		5000
 class Simon:public GameObject
 {
+	int untouchable;
+	DWORD untouchable_start;
 public:
-	void Update(DWORD dt);
-	void Render();
+	virtual void Update(DWORD dt , vector<LPGAMEOBJECT> *colliable_objects = NULL);
+	virtual void Render();
 	void SetState(int state);
+	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount(); }
+	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 };
 

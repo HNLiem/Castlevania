@@ -6,15 +6,17 @@
 using namespace std;
 class Animation
 {
-private:
+public:
 	DWORD lastFrameTime;
 	int defaultTime;
 	int currentFrame;
 	vector<LPANIMATION_FRAME> frames;
+	bool box;
 public:
 	Animation(int defaultTime) { this->defaultTime = defaultTime; this->lastFrameTime = -1; this->currentFrame = -1; };
 	void Add(int spriteId, DWORD time = 0);
 	void Render(float x, float y);
+	bool GetBoolBox() { return box; }
 	~Animation();
 
 };

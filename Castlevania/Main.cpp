@@ -11,6 +11,8 @@
 #include"Sprites.h"
 #include"Weapon.h"
 #include"Monster.h"
+#include"Brick.h"
+#include"Torch.h"
 
 #define WINDOW_CLASS_NAME L"SampleWindow"
 #define MAIN_WINDOW_TITLE L"Castlevania"
@@ -23,12 +25,16 @@
 #define ID_TEX_SIMON2 2
 #define ID_TEX_WEAPON 3
 #define ID_TEX_WEAPON1 4
+#define ID_TEX_TORCH   5
 #define ID_TEX_MISC 20
-
+// xu ly va cham hai vat va cham khong van toc su dung AABB
 Game *game;
 Simon *simon;
 Weapon *weapon;
+Torch *torch;
+vector<LPGAMEOBJECT> objects;
 
+int a = 0;
 
 class SampleKeyHander : public KeyEventHandler
 {
@@ -41,13 +47,18 @@ SampleKeyHander * keyHandler;
 
 void SampleKeyHander::OnKeyDown(int KeyCode)
 {
-	switch (KeyCode)
+	/*switch (KeyCode)
 	{
 	case DIK_SPACE:
 		simon->SetState(SIMON_STATE_JUMP);
 		break;
+	case DIK_K:
+		simon->SetState(SIMON_STATE_FIGHT);
+		weapon->SetState(WEAPON_STATE_FIGHT, simon);
+		
+		break;
 	
-	}
+	}*/
 }
 
 void SampleKeyHander::OnKeyUp(int KeyCode)
@@ -61,8 +72,9 @@ void SampleKeyHander::KeyState(BYTE *states)
 	{
 		if (game->IsKeyDown(DIK_F))
 		{
+			simon->SetState(SIMON_STATE_IDLE);
 			simon->SetState(SIMON_STATE_FIGHT);
-			weapon->SetState(WEAPON_STATE_FIGHT,simon);
+			weapon->SetState(WEAPON_STATE_FIGHT, simon);
 		}
 		else
 		{
@@ -72,8 +84,17 @@ void SampleKeyHander::KeyState(BYTE *states)
 	}
 	else if (game->IsKeyDown(DIK_LEFT))
 	{
-		simon->SetState(SIMON_STATE_WALKING_LEFT);
-		weapon->SetState(WEAPON_STATE_IDLE,simon);
+		if (game->IsKeyDown(DIK_F))
+		{
+			simon->SetState(SIMON_STATE_IDLE);
+			simon->SetState(SIMON_STATE_FIGHT);
+			weapon->SetState(WEAPON_STATE_FIGHT, simon);
+		}
+		else
+		{
+			simon->SetState(SIMON_STATE_WALKING_LEFT);
+			weapon->SetState(WEAPON_STATE_IDLE, simon);
+		}
 	}
 	else if (game->IsKeyDown(DIK_DOWN))
 	{
@@ -99,9 +120,8 @@ void SampleKeyHander::KeyState(BYTE *states)
 	
 	else
 	{
-		simon->SetState(SIMON_STATE_IDLE);
-		weapon->SetState(WEAPON_STATE_IDLE,simon);
-		
+			simon->SetState(SIMON_STATE_IDLE);
+			weapon->SetState(WEAPON_STATE_IDLE, simon);
 	}
 }
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -120,18 +140,29 @@ void LoadResources()
 {
 	Textures * textures = Textures::GetInstance();
 	textures->Add(ID_TEX_SIMON, L"Resources\\simon1.png", D3DCOLOR_XRGB(255, 0, 255));
-	Textures * textures1 = Textures::GetInstance();
-	textures1->Add(ID_TEX_SIMON1, L"Resources\\simon.png", D3DCOLOR_XRGB(255, 0, 255));
-	Textures * texture3 = Textures::GetInstance();
-	texture3->Add(ID_TEX_WEAPON, L"Resources\\morningstar1.png", D3DCOLOR_XRGB(255, 0, 255));
-	Textures * textures4 = Textures::GetInstance();
-	textures4->Add(ID_TEX_WEAPON1, L"Resources\\morningstar.png", D3DCOLOR_XRGB(255, 0, 255));
+	//Textures * textures1 = Textures::GetInstance();
+	textures->Add(ID_TEX_SIMON1, L"Resources\\simon.png", D3DCOLOR_XRGB(255, 0, 255));
+	//Textures * texture3 = Textures::GetInstance();
+	textures->Add(ID_TEX_WEAPON, L"Resources\\morningstar1.png", D3DCOLOR_XRGB(255, 0, 255));
+	//Textures * textures4 = Textures::GetInstance();
+	textures->Add(ID_TEX_WEAPON1, L"Resources\\morningstar.png", D3DCOLOR_XRGB(255, 0, 255));
+	textures->Add(ID_TEX_MISC, L"Resources\\ground\\2.png", D3DCOLOR_XRGB(255, 0, 255));
+	textures->Add(ID_TEX_TORCH, L"Resources\\ground\\0.png", D3DCOLOR_XRGB(255, 0, 255));
 	Sprites * sprites = Sprites::GetInstance();
 	Animations * animations = Animations::GetInstance();
 	LPDIRECT3DTEXTURE9 texSimon = textures->Get(ID_TEX_SIMON);
 	LPDIRECT3DTEXTURE9 texSimon1 = textures->Get(ID_TEX_SIMON1);
 	LPDIRECT3DTEXTURE9 texWeapon = textures->Get(ID_TEX_WEAPON);
 	LPDIRECT3DTEXTURE9 texWeapon1 = textures->Get(ID_TEX_WEAPON1);
+	LPDIRECT3DTEXTURE9 texbrick = textures->Get(ID_TEX_MISC);
+	LPDIRECT3DTEXTURE9 textorch = textures->Get(ID_TEX_TORCH);
+	// gach
+	sprites->Add(20001, 0, 0, 32, 32, texbrick);
+	// ngon duoc
+	sprites->Add(20002, 0, 0, 32, 64, textorch);
+	sprites->Add(20003, 32, 0, 62, 64, textorch);
+	// khong duoc
+	sprites->Add(20004, 0, 0, 0, 0, textorch);
 	//di phai
 	sprites->Add(10001, 314, 4, 344, 64, texSimon);
 	sprites->Add(10002, 378, 2, 402, 64, texSimon);
@@ -255,7 +286,7 @@ void LoadResources()
 	Simon::AddAnimation(900);
 	Simon::AddAnimation(901);
 	simon->SetPosition(0.0f,100.0f);
-
+	//objects.push_back(simon);
 	ani = new Animation(100);
 	ani->Add(10011);
 	ani->Add(10012);
@@ -270,13 +301,54 @@ void LoadResources()
 	Weapon::AddAnimation(1000);
 	Weapon::AddAnimation(1001);
 	weapon->SetPosition(simon);
+	
+	ani = new Animation(100);
+	ani->Add(20001);
+	animations->Add(1002, ani);
+	//objects.push_back(weapon);
+	
+	
+	for (int i = -6; i < 30; i++)
+	{
+		Brick *brick = new Brick();
+		brick->AddAnimation(1002);
+		brick->SetPosition(i * 32.0f,160);
+		objects.push_back(brick);
+		
+	}
 
-
+	ani = new Animation(100);
+	ani->Add(20002);
+	ani->Add(20003);
+	animations->Add(1003, ani);
+	ani = new Animation(100);
+	ani->Add(20004);
+	animations->Add(1004, ani);
+	torch = new Torch();
+	Torch::AddAnimation(1003);
+	Torch::AddAnimation(1004);
+	torch->SetPosition(50, 100);
+	//objects.push_back(torch);
 }
 void Update(DWORD dt)
 {
+	vector<LPGAMEOBJECT> coObjects;
+	
+	for (int i = 1; i < objects.size(); i++)
+	{
+		coObjects.push_back(objects[i]);
+	}
+
+	for (int i = 0; i < objects.size(); i++)
+	{
+		objects[i]->Update(dt, &coObjects);
+	}
 	simon->Update(dt);
-	weapon->Update(dt,simon);
+	float cx, cy;
+	cx = simon->Getx();
+	cy = simon->Gety();
+	weapon->Update(dt, simon, torch);
+	game->SetPosition(cx - SCREEN_WIDTH / 2, 0);
 }
 void Render()
 {
@@ -288,8 +360,13 @@ void Render()
 	{
 		d3ddv->ColorFill(bb, NULL, BACKGROUND_COLOR);
 		spriteHandler->Begin(D3DXSPRITE_ALPHABLEND);
-		weapon->Render(simon);
+		for (int i = 0; i < objects.size(); i++)
+		{
+			objects[i]->Render();
+		}
+		torch->Render();
 		simon->Render();
+		weapon->Render(simon);		
 		spriteHandler->End();
 		d3ddv->EndScene();
 	}
@@ -388,6 +465,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	keyHandler = new SampleKeyHander();
 	game->InitKeyboard(keyHandler);
 	LoadResources();
+	//SetWindowPos(hWnd, 0, 0, 0, SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2, SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER);
 	Run();
 	return 0;
 }

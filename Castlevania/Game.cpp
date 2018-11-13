@@ -1,4 +1,4 @@
-#include "Game.h"
+﻿#include "Game.h"
 Game * Game::_instance = NULL;
 
 
@@ -89,7 +89,7 @@ void Game::Init(HWND hWnd)
 
 void Game::Draw(float x, float y, LPDIRECT3DTEXTURE9 texture, int left, int top, int right, int bottom, int alpha, int isFlippedHorizontally)
 {
-	D3DXVECTOR3 p(x, y, 0);
+	D3DXVECTOR3 p(x-this->camx, y-this->camy, 0);
 	RECT r;
 	r.left = left;
 	r.top = top;
@@ -171,6 +171,180 @@ Game * Game::GetInstance()
 	}
 	return _instance;
 }
+// ml,mt,mr,mb :left top right bottom cua object
+// sl,st,sr,sb: left top right bottom cua other
+// dx,dy,nx, ny cua object m
+void Game::SweptAABB(float ml, float mt, float mr, float mb, float dx, float dy, float sl, float st, float sr, float sb, float & t, float & nx, float & ny)
+{
+	float dx_entry, dx_exit, tx_entry, tx_exit;
+	float dy_entry, dy_exit, ty_entry, ty_exit;
+
+	float t_entry;
+	float t_exit;
+
+	t = -1.0f;			
+
+	float bl = dx > 0 ? ml : ml + dx;
+	float bt = dy > 0 ? mt : mt + dy;
+	float br = dx > 0 ? mr + dx : mr;
+	float bb = dy > 0 ? mb + dy : mb;
+	// tao mot hinh chu nhat moi voi tao do x,y cao dai
+	
+	//float bl, bt, br, bb;
+	
+	/*if (dx > 0)
+	{
+		// van toc lon hon 0
+		// left=left vat
+		bl = ml;
+	}
+	else
+	{
+		// left=left+vantoc x
+		bl = ml + dx;
+	}
+	if (dy > 0)
+	{
+		bt = mt;
+	}
+	else
+	{
+		bt = mt + dy;
+	}
+	if (dx > 0)
+	{
+		br = mr+dx;
+	}
+	else
+	{
+		br = mr;
+	}
+	if (dy > 0)
+	{
+		bb = mb+dy;
+	}
+	else
+	{
+		bb = mb;
+	}*/
+	if (br < sl || bl > sr || bb < st || bt > sb)
+	{
+		return;
+	}
+
+
+	/*if (dx == 0 && dy == 0)
+	{
+		return;
+	}*/// moving object is not moving > obvious no collision
+	// s=other m object simon roi
+	//dxEntry, dyEntry: là khoảng cách cần đi để các bắt đầu va chạm.
+	//dxExit, dyExit: là khoảng cách cần đi kể từ lúc này để khi hết va chạm.
+	// d=v cua aVinh
+	if (dx > 0)
+	{
+		dx_entry = sl - mr;
+		dx_exit = sr - ml;
+	}
+	else if (dx < 0)
+	{
+		dx_entry = sr - ml;
+		dx_exit = sl - mr;
+	}
+
+
+	if (dy > 0)
+	{
+		dy_entry = st - mb;
+		dy_exit = sb - mt;
+	}
+	else if (dy < 0)
+	{
+		dy_entry = sb - mt;
+		dy_exit = st - mb;
+	}
+	// khuc nay tim thoi gian bat dau va ket thuc va cham
+	//tg=s/v
+	if (dx == 0)
+	{
+		tx_entry = -99999999999;
+		tx_exit = 99999999999;
+	}
+	else
+	{
+		tx_entry = dx_entry / dx;
+		tx_exit = dx_exit / dx;
+	}
+
+	if (dy == 0)
+	{
+		ty_entry = -99999999999;
+		ty_exit = 99999999999;
+	}
+	else
+	{
+		ty_entry = dy_entry / dy;
+		ty_exit = dy_exit / dy;
+	}
+
+
+	if ((tx_entry < 0.0f && ty_entry < 0.0f) || tx_entry > 1.0f || ty_entry > 1.0f)
+	{
+		return;
+	}
+	// thời gian va chạm là thời gian lớn nhất của 2 trục (2 trục phải cùng tiếp xúc thì mới va chạm)
+	t_entry = max(tx_entry, ty_entry);
+	// thời gian hết va chạm là thời gian của 2 trục, (1 cái ra khỏi là object hết va chạm)
+	t_exit = min(tx_exit, ty_exit);
+
+	// thoi gian can de va cham lon hon thoi gian thoat va cham
+	// return khong set nua
+	if (t_entry > t_exit)
+	{
+		return;
+	}
+
+	t = t_entry;
+	// tim huoong va cham
+	if (tx_entry > ty_entry)
+	{
+		ny = 0.0f;
+		//dx > 0 ? nx = -1.0f : nx = 1.0f;
+		if (dx > 0)
+		{
+			nx = -1.0f; // va cham ben phai
+		}
+		else
+		{
+			nx = 1.0f;// va cham ben trai
+		}
+	}
+	else
+	{
+		nx = 0.0f;
+		//dy > 0 ? ny = -1.0f : ny = 1.0f;
+		if (dy > 0)
+		{
+			ny = -1.0f;// va cham ben tren
+		}
+		else
+		{
+			ny = 1.0f;// va cham ben duoi
+		}
+	}
+}
+// s la other 
+bool Game::AABB(float ml, float mt, float mr, float mb, float sl, float st, float sr, float sb)
+{
+	float left = sl - mr;
+	float top=sb-mt;
+	float right = sr - ml;
+	float bottom = st - mb;
+	return !(left > 0 || right < 0 || top < 0 || bottom > 0);
+
+}
+
+
 
 Game::~Game()
 {

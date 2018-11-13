@@ -1,4 +1,4 @@
-#include "Animation.h"
+﻿#include "Animation.h"
 #include"Game.h"
 #include"Sprites.h"
 void Animation::Add(int spriteId, DWORD time)
@@ -16,11 +16,12 @@ void Animation::Add(int spriteId, DWORD time)
 
 void Animation::Render(float x, float y)
 {
-	
 	DWORD now = GetTickCount();
 	if (currentFrame == -1)
 	{
+		// khung hien tai =0
 		currentFrame = 0;
+		//Thời gian khung cuối cùng
 		lastFrameTime = now;
 	}
 	else
@@ -30,12 +31,18 @@ void Animation::Render(float x, float y)
 		{
 			currentFrame++;
 			lastFrameTime = now;
-			if (currentFrame == frames.size()) currentFrame = 0;
+			if (currentFrame == frames.size())
+			{
+				currentFrame = 0;
+			}
 		}
 
 	}
-	
 	frames[currentFrame]->GetSprite()->Draw(x,y);
+	if (currentFrame == 2)
+	{
+		box = true;
+	}
 }
 
 Animation::~Animation()

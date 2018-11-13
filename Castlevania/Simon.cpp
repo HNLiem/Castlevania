@@ -1,25 +1,52 @@
-#include "Simon.h"
+﻿#include "Simon.h"
+#include <algorithm>
+#include"Game.h"
 
-
-void Simon::Update(DWORD dt)
+void Simon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
 	GameObject::Update(dt);
-	vy += SIMON_GRAVITY;
-	if (y > 100)
+	vy += SIMON_GRAVITY*dt;
+	/*vector<LPCOLLISIONEVENT> coEvents;
+	vector<LPCOLLISIONEVENT> coEventsResult;
+	coEvents.clear();
+	CalcPotentialCollisions(coObjects, coEvents);
+	if (GetTickCount() - untouchable_start > SIMON_UNTOUCHABLE_TIME)
 	{
+		untouchable_start = 0;
+		untouchable = 0;
+	}
+	if (coEvents.size() == 0)
+	{
+		x += dx;
+		y += dy;
+	}
+	else
+	{
+		float min_tx, min_ty, nx = 0, ny;
+		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny);
+		if (nx != 0)
+		{
+			vx = 0;
+		}
+		if (ny != 0) 
+		{
+			vy = 0;
+		}
+	}
+	// clean up collision events
+	for (UINT i = 0; i < coEvents.size(); i++)
+	{
+		delete coEvents[i];
+	}*/
+	if (y > 100)
+
+	{
+
 		vy = 0;
 		y = 100.0f;
-	}
 
+	}
 	
-	if (vx > 0 && x > 290)
-	{
-		x = 290;
-	}
-	if (vx < 0 && x < 0)
-	{
-		x = 0;
-	}
 }
 
 void Simon::Render()
@@ -107,7 +134,7 @@ void Simon::SetState(int state)
 	case SIMON_STATE_JUMP:
 		if (y == 100)
 			vy = -SIMON_JUMP_SPEED_Y;
-
+		break;
 	case SIMON_STATE_IDLE:
 		vx = 0;
 		if (nx > 0)
@@ -153,6 +180,14 @@ void Simon::SetState(int state)
 		}
 		break;
 	}
+}
+
+void Simon::GetBoundingBox(float & left, float & top, float & right, float & bottom)
+{
+	left = x;
+    top = y;
+	right = x + SIMON_BBOX_WIDTH;
+	left = y + SIMON_BBOX_HEIGHT;
 }
 
 

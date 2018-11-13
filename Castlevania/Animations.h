@@ -13,4 +13,3 @@ public:
 	LPANIMATION Get(int id);
 	static Animations * GetInstance();
 };
-

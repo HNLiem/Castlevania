@@ -11,6 +11,8 @@ public:
 	virtual void KeyState(BYTE *state) = 0;
 	virtual void OnKeyDown(int KeyCode) = 0;
 	virtual void OnKeyUp(int KeyCode) = 0;
+	// cameara
+	
 };
 typedef KeyEventHandler * LPKEYEVENTHANDLER;
 class Game
@@ -27,6 +29,7 @@ private:
 	DIDEVICEOBJECTDATA keyEvents[KEYBOARD_BUFFER_SIZE];		
 	LPKEYEVENTHANDLER keyHandler;
 	BYTE  keyStates[256];
+	float camx, camy;
 public:
 	void InitKeyboard(LPKEYEVENTHANDLER handler);
 	void Init(HWND hWnd);
@@ -37,6 +40,31 @@ public:
 	LPDIRECT3DSURFACE9 GetBackBuffer() { return backBuffer; }
 	LPD3DXSPRITE GetSpriteHandler() { return this->spriteHandler; }
 	static Game * GetInstance();
+	static void SweptAABB(
+		float ml,			
+		float mt,			
+		float mr,			 
+		float mb,			
+		float dx,			
+		float dy,			
+		float sl,			
+		float st,
+		float sr,
+		float sb,
+		float &t,
+		float &nx,
+		float &ny
+	);
+	static bool AABB(float ml,
+		float mt,
+		float mr,
+		float mb, 
+		float sl,
+		float st,
+		float sr,
+		float sb);
+
+	void SetPosition(float x, float y) { this->camx = x; this->camy = y; }
 	~Game();
 };
 
